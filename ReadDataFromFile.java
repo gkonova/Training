@@ -5,9 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
@@ -24,8 +25,8 @@ public class ReadDataFromFile {
 			System.out.println("-----------Welcome to PhoneBook.-------------");
 			System.out.println("Chouse your option .");
 			System.out.println("1. Add New Contact " + "\n" + "2. Search Number " + "\n" + "3. Delete Number" + "\n"
-					+ "4. Show All contact" + "\n" + "5. Sort" + "\n" + "6. Call a number and show most wanted numbers "
-					+ "\n" + "7. Exit");
+					+ "4. Show All contact" + "\n" + "5. Sort" + "\n" + "6. Call a number " + "\n"
+					+ "7. View most wanted numbers " + "\n" + "8. Exit");
 			int option = input.nextInt();
 
 			switch (option) {
@@ -50,11 +51,10 @@ public class ReadDataFromFile {
 				Map<String, String> unsorted = showAll();
 				sortPhoneBook(unsorted);
 				break;
-
-			case 6:
-				mostWantedNumbers();
-				break;
 			case 7:
+				mostWanted();
+				break;
+			case 8:
 				System.out.println("Thank you for using PhoneBook ....");
 				System.exit(0);
 			}
@@ -159,26 +159,36 @@ public class ReadDataFromFile {
 		System.out.println("Sorted PhoneBook" + sorted.entrySet());
 	}
 
-//	private Integer callOutgoingCallsForNumber(String currentNumber) {
-//	
-//	}
-
-	private void mostWantedNumbers() {
-		System.out.println("Enter The Name : ");
-		String name = input.next();
-		System.out.println(phoneBook.containsKey(name) ? "The Number of " + name + " is : " + phoneBook.get(name)
-				: "The Number Not Present ");
-		Integer counter = 0;
-		System.out.println("Do you want to call this number? Y or N ?");
-		String answer = input.next();
-		if (answer.equals("Y")) {
-			counter++;
+	private void mostWanted() {
+		List<String> list = callSomeone();
+		Map<String, Integer> duplicates = new HashMap<String, Integer>();
+		for (String str : list) {
+			if (duplicates.containsKey(str)) {
+				duplicates.put(str, duplicates.get(str) + 1);
+			} else {
+				duplicates.put(str, 1);
+			}
 		}
+		for (Map.Entry<String, Integer> entry : duplicates.entrySet()) {
+			System.out.println(entry.getKey() + " = " + entry.getValue());
+		}
+	}
 
-		Map<String, String> mostWantedNumber = new HashMap<String, String>();
-		mostWantedNumber.put(name, phoneBook.get(name));
+	private List<String> callSomeone() {
+		List<String> list = new ArrayList<String>();
+		String choice;
 
-		System.out.println("Phone book valid members " + mostWantedNumber);
+		do {
+			System.out.println("Enter The Name : ");
+			String name = input.next();
+			list.add(name);
+			System.out.println("Do you want to continue calling? y or n");
+			choice = input.next();
+		} while (choice.equals("Y"));
 
+		if (!choice.equals("Y")) {
+			System.out.println("Ok let's see most called person");
+		}
+		return list;
 	}
 }
