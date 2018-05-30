@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
@@ -23,7 +24,8 @@ public class ReadDataFromFile {
 			System.out.println("-----------Welcome to PhoneBook.-------------");
 			System.out.println("Chouse your option .");
 			System.out.println("1. Add New Contact " + "\n" + "2. Search Number " + "\n" + "3. Delete Number" + "\n"
-					+ "4. Show All contact" + "\n" + "5. Sort" + "\n" + "6. Exit");
+					+ "4. Show All contact" + "\n" + "5. Sort" + "\n" + "6. Call a number and show most wanted numbers "
+					+ "\n" + "7. Exit");
 			int option = input.nextInt();
 
 			switch (option) {
@@ -35,10 +37,7 @@ public class ReadDataFromFile {
 				break;
 			case 3:
 				try {
-					deleteNumber();
-				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					deleteByName();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -51,7 +50,11 @@ public class ReadDataFromFile {
 				Map<String, String> unsorted = showAll();
 				sortPhoneBook(unsorted);
 				break;
+
 			case 6:
+				mostWantedNumbers();
+				break;
+			case 7:
 				System.out.println("Thank you for using PhoneBook ....");
 				System.exit(0);
 			}
@@ -91,39 +94,31 @@ public class ReadDataFromFile {
 		}
 	}
 
-	private void deleteNumber() throws FileNotFoundException, IOException {
-
-		File inputFile = new File(fileName);
-		File tempFile = new File("myTempFile.txt");
+	private void deleteByName() throws FileNotFoundException, IOException {
+		File inputFile = new File("C:\\Users\\gloriya.konova\\Desktop\\phonebook.txt");
+		File tempFile = new File("C:\\\\Users\\\\gloriya.konova\\\\Desktop\\\\myTempFile.txt");
 
 		BufferedReader reader = new BufferedReader(new FileReader(inputFile));
 		BufferedWriter writer = new BufferedWriter(new FileWriter(tempFile));
 
-		System.out.println("Enter The name to Delete : ");
+		System.out.println("Delete The Name : ");
 		String name = input.next();
 		String lineToRemove = name;
 		String currentLine;
 
-		try {
-			while ((currentLine = reader.readLine()) != null) {
-				// trim newline when comparing with lineToRemove
-				String trimmedLine = currentLine.trim();
-				if (trimmedLine.equals(lineToRemove)) {
-					continue;
-				}
-				phoneBook.remove(name);
-				writer.write(currentLine + System.getProperty("line.separator"));
-				System.out.println("Remove it from PhoneBook ");
-
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			System.out.println("Can not find person with this name ");
-			e.printStackTrace();
+		while ((currentLine = reader.readLine()) != null) {
+			// trim newline when comparing with lineToRemove
+			String trimmedLine = currentLine.trim();
+			System.out.println("Current line" + trimmedLine.startsWith(lineToRemove));
+			if (trimmedLine.startsWith(lineToRemove))
+				continue;
+			writer.write(currentLine + System.getProperty("line.separator"));
 		}
+
 		writer.close();
 		reader.close();
-		boolean successful = tempFile.renameTo(inputFile);
+
+		tempFile.renameTo(inputFile);
 	}
 
 	private void searchNumber() {
@@ -151,7 +146,7 @@ public class ReadDataFromFile {
 				e.printStackTrace();
 			}
 		} else {
-			System.out.println("Number is not valid !!! ");
+			System.out.println("Number is not valid! ");
 		}
 	}
 
@@ -161,32 +156,29 @@ public class ReadDataFromFile {
 
 		// Copy all data from hashMap into TreeMap
 		sorted.putAll(unsorted);
-
-		// Display the TreeMap which is naturally sorted
-		System.out.println("sorted " + sorted.entrySet());
-		for (Map.Entry<String, String> entry : sorted.entrySet())
-			System.out.println("Key = " + entry.getKey() + ", Value = " + entry.getValue());
-
+		System.out.println("Sorted PhoneBook" + sorted.entrySet());
 	}
 
-	// private String replaceNumbers(String number) {
-	//
-	// Pattern p = Pattern.compile("^00");
-	// Matcher m = p.matcher(number);
-	//
-	// Pattern p2 = Pattern.compile("^0");
-	// Matcher m2 = p2.matcher(number);
-	//
-	// StringBuilder sb = new StringBuilder(number);
-	// if (m.find()) {
-	// sb.replace(0, 0, "+359");
-	// return sb.toString();
-	// }
-	//
-	// if (m2.find()) {
-	// sb.replace(0, 1, "+");
-	// return sb.toString();
-	// }
-	// return "";
-	// }
+//	private Integer callOutgoingCallsForNumber(String currentNumber) {
+//	
+//	}
+
+	private void mostWantedNumbers() {
+		System.out.println("Enter The Name : ");
+		String name = input.next();
+		System.out.println(phoneBook.containsKey(name) ? "The Number of " + name + " is : " + phoneBook.get(name)
+				: "The Number Not Present ");
+		Integer counter = 0;
+		System.out.println("Do you want to call this number? Y or N ?");
+		String answer = input.next();
+		if (answer.equals("Y")) {
+			counter++;
+		}
+
+		Map<String, String> mostWantedNumber = new HashMap<String, String>();
+		mostWantedNumber.put(name, phoneBook.get(name));
+
+		System.out.println("Phone book valid members " + mostWantedNumber);
+
+	}
 }
