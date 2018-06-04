@@ -14,10 +14,12 @@ import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class ReadDataFromFile {
 	String fileName = "C:\\Users\\gloriya.konova\\Desktop\\phonebook.txt";
-	Map<String, String> phoneBook = new HashMap<String, String>();
+	TreeMap<String, String> phonebook = new TreeMap<String, String>();
+	List<String> callUser = new ArrayList<String>();
 	Scanner input = new Scanner(System.in);
 
 	public void menue() {
@@ -25,8 +27,8 @@ public class ReadDataFromFile {
 			System.out.println("-----------Welcome to PhoneBook.-------------");
 			System.out.println("Chouse your option .");
 			System.out.println("1. Add New Contact " + "\n" + "2. Search Number " + "\n" + "3. Delete Number" + "\n"
-					+ "4. Show All contact" + "\n" + "5. Sort" + "\n" + "6. Call a number " + "\n"
-					+ "7. View most wanted numbers " + "\n" + "8. Exit");
+					+ "4. Show All Contacts " + "\n" + "5. Call a Number " + "\n"
+					+ "6. View Most Wanted Numbers " + "\n" + "7. Exit");
 			int option = input.nextInt();
 
 			switch (option) {
@@ -48,20 +50,19 @@ public class ReadDataFromFile {
 				showAll();
 				break;
 			case 5:
-				Map<String, String> unsorted = showAll();
-				sortPhoneBook(unsorted);
+				callSomeone();
+				break;
+			case 6:
+				mostWanted(callUser);
 				break;
 			case 7:
-				mostWanted();
-				break;
-			case 8:
 				System.out.println("Thank you for using PhoneBook ....");
 				System.exit(0);
 			}
 		}
 	}
 
-	private Map<String, String> showAll() {
+	private TreeMap<String, String> showAll() {
 		try {
 			BufferedReader lineReader = new BufferedReader(new FileReader(fileName));
 			String lineText = null;
@@ -72,7 +73,7 @@ public class ReadDataFromFile {
 				String num = personInformation[1];
 
 				if (validateNumber(num) == true) {
-					phoneBook.put(name.toLowerCase(), num);
+					phonebook.put(name.toLowerCase(), num);
 				}
 			}
 			lineReader.close();
@@ -80,8 +81,8 @@ public class ReadDataFromFile {
 		} catch (IOException ex) {
 			System.err.println(ex);
 		}
-		System.out.println("Phone book valid members " + phoneBook);
-		return phoneBook;
+		System.out.println("Phonebook valid members " + phonebook);
+		return phonebook;
 	}
 
 	private boolean validateNumber(String number) {
@@ -109,7 +110,6 @@ public class ReadDataFromFile {
 		while ((currentLine = reader.readLine()) != null) {
 			// trim newline when comparing with lineToRemove
 			String trimmedLine = currentLine.trim();
-			System.out.println("Current line" + trimmedLine.startsWith(lineToRemove));
 			if (trimmedLine.startsWith(lineToRemove))
 				continue;
 			writer.write(currentLine + System.getProperty("line.separator"));
@@ -124,7 +124,7 @@ public class ReadDataFromFile {
 	private void searchNumber() {
 		System.out.println("Enter The Name : ");
 		String name = input.next();
-		System.out.println(phoneBook.containsKey(name) ? "The Number of " + name + " is : " + phoneBook.get(name)
+		System.out.println(phonebook.containsKey(name) ? "The Number of " + name + " is : " + phonebook.get(name)
 				: "The Number Not Present ");
 	}
 
@@ -138,7 +138,7 @@ public class ReadDataFromFile {
 			try {
 				Writer output = new BufferedWriter(new FileWriter(fileName, true));
 				output.append('\n' + name + " , " + number);
-				// phoneBook.put(name, number);
+				phonebook.put(name, number);
 				output.close();
 				System.out.println("Number Added Successfully ..");
 			} catch (IOException e) {
@@ -150,45 +150,40 @@ public class ReadDataFromFile {
 		}
 	}
 
-	private void sortPhoneBook(Map<String, String> unsorted) {
-
-		TreeMap<String, String> sorted = new TreeMap<>();
-
-		// Copy all data from hashMap into TreeMap
-		sorted.putAll(unsorted);
-		System.out.println("Sorted PhoneBook" + sorted.entrySet());
-	}
-
-	private void mostWanted() {
-		List<String> list = callSomeone();
+	private void mostWanted(List<String> allCalls) {
 		Map<String, Integer> duplicates = new HashMap<String, Integer>();
-		for (String str : list) {
+		
+		for (String str : allCalls) {
 			if (duplicates.containsKey(str)) {
 				duplicates.put(str, duplicates.get(str) + 1);
 			} else {
 				duplicates.put(str, 1);
 			}
 		}
-		for (Map.Entry<String, Integer> entry : duplicates.entrySet()) {
-			System.out.println(entry.getKey() + " = " + entry.getValue());
+		
+		List<Integer> values = new ArrayList<Integer>(duplicates.values());
+		List<String> keys = new ArrayList<String>(duplicates.keySet());
+		values.stream().sorted().limit(3).collect(Collectors.toList());
+		
+		for (Integer value: values) {
+			System.out.println("Most called numbers " + value);
 		}
 	}
 
 	private List<String> callSomeone() {
-		List<String> list = new ArrayList<String>();
 		String choice;
-
 		do {
 			System.out.println("Enter The Name : ");
 			String name = input.next();
-			list.add(name);
+			callUser.add(name);
 			System.out.println("Do you want to continue calling? y or n");
 			choice = input.next();
 		} while (choice.equals("Y"));
 
 		if (!choice.equals("Y")) {
-			System.out.println("Ok let's see most called person");
+			System.out.println("Thanks for calling using phonebook");
+			menue();
 		}
-		return list;
+		return callUser;
 	}
 }
